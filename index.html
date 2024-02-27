@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Celebration Web App</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <script src="https://unpkg.com/canvas-confetti"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <style>
+      body {
+        font-family: 'Open Sans', sans-serif;
+      }
+      .celebration-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+      .celebration-message {
+        text-align: center;
+        font-size: 1.5rem;
+        margin-top: 2rem;
+      }
+      .animate-fade-in {
+        animation: fadeIn 1s ease-in-out;
+      }
+
+      .divider-animation {
+        animation: divider 1s ease-in-out;
+      }
+
+      @keyframes divider {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="celebration-container">
+      <div class="max-w-[120ch] mx-auto bg-white shadow-lg rounded-lg p-8">
+        <h1 class="text-4xl font-bold text-center mb-6">It's a celebration!</h1>
+        <form id="celebrationForm" class="space-y-4">
+          <div>
+            <label for="occasion" class="block text-lg font-semibold"
+              >What's the occasion:</label
+            >
+            <select id="occasion" class="w-full p-2 border rounded" required>
+              <option value="">Select an option</option>
+              <option value="Birthday">Birthday</option>
+              <option value="Anniversary">Anniversary</option>
+              <option value="Graduation">Graduation</option>
+              <option value="Other">Other</option>
+            </select>
+            <input
+              type="text"
+              id="otherOccasion"
+              class="w-full p-2 border rounded hidden"
+              placeholder="Enter the occasion"
+            />
+          </div>
+          <div>
+            <label for="personName" class="block text-lg font-semibold"
+              >Person's name:</label
+            >
+            <input
+              type="text"
+              id="personName"
+              class="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div>
+            <label for="text" class="block text-lg font-semibold">Text:</label>
+            <input
+              type="text"
+              id="text"
+              class="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <button
+            id="celebrateButton"
+            type="submit"
+            class="w-full bg-blue-500 hover:bg-blue-700 text-white p-3 rounded font-bold text-lg transition duration-300"
+          >
+            Celebrate
+          </button>
+        </form>
+        <div
+          id="celebrationMessage"
+          class="hidden celebration-message z-[1000]"
+        >
+          <p id="messageOccasion"></p>
+          <p id="messageName"></p>
+          <p id="messageText"></p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // check if params are present in the URL
+      function getURLParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+          occasion: params.get('occasion'),
+          personName: params.get('person'),
+          text: params.get('text'),
+        };
+      }
+
+      async function displayCelebration({
+        occasion = 'Birthday',
+        personName = 'John Doe',
+        text = 'Happy Birthday!',
+      }) {
+        const celebrationMessage =
+          document.getElementById('celebrationMessage');
+        celebrationMessage.innerHTML = `
+          <div class="p-8 animate-fade-in">
+            <p class="text-xl mt-2">Celebrating</p>
+            <h1 class="text-4xl font-black tracking-tighter sm:text-6xl capitalize mb-6">${personName}</h1>
+            <h2 class="text-3xl font-bold">${occasion}</h2>
+            <span class="block w-full h-1 bg-blue-500 my-4 divider-animation"></span>
+            <p class="italic mt-4">${text}</p>
+          </div>
+        `;
+        celebrationMessage.classList.remove('hidden');
+        document.getElementById('celebrationForm').classList.add('hidden');
+        const celebrationImg = document.createElement('img');
+        celebrationImg.src =
+          'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExb3lmdDJycXAyNTQ4emVhd29rMzZwc2FhcGd4aXh4cnZxeHg5Z2MxYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xeXEpUVvAxCV2/giphy.gif';
+        celebrationImg.classList.add(
+          'w-full',
+          'rounded-lg',
+          'mt-8',
+          'divider-animation'
+        );
+        celebrationMessage.appendChild(celebrationImg);
+
+        var duration = 30 * 1000;
+        var end = Date.now() + duration;
+
+        // wait for a little bit before launching the confetti
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        (function frame() {
+          // launch a few confetti from the left edge
+          confetti({
+            particleCount: 5,
+            angle: 60,
+            spread: 100,
+            origin: { x: 0 },
+          });
+          // and launch a few from the right edge
+          confetti({
+            particleCount: 5,
+            angle: 120,
+            spread: 100,
+            origin: { x: 1 },
+          });
+
+          // keep going until we are out of time
+          if (Date.now() < end) {
+            requestAnimationFrame(frame);
+          }
+        })();
+
+        // every 5 seconds, launch a few confetti from the top
+        setInterval(function () {
+          confetti({
+            particleCount: 100,
+            angle: 180,
+            spread: 360,
+            origin: { y: 0 },
+          });
+        }, 5000);
+      }
+
+      const urlParams = getURLParams();
+      if (urlParams.occasion) {
+        displayCelebration(urlParams);
+      }
+
+      document
+        .getElementById('occasion')
+        .addEventListener('change', function (event) {
+          const otherOccasion = document.getElementById('otherOccasion');
+          if (event.target.value === 'Other') {
+            otherOccasion.classList.remove('hidden');
+          } else {
+            otherOccasion.classList.add('hidden');
+          }
+        });
+      document
+        .getElementById('celebrationForm')
+        .addEventListener('submit', function (event) {
+          event.preventDefault();
+          let occasion = document.getElementById('occasion').value;
+
+          if (occasion === 'Other') {
+            occasion = document.getElementById('otherOccasion').value;
+          }
+          const personName = document.getElementById('personName').value;
+          const text = document.getElementById('text').value;
+
+          displayCelebration({ occasion, personName, text });
+          /*
+            confetti({
+            particleCount: 100, // number of confetti particles
+            spread: 70, // spread of confetti in degrees
+            origin: { y: 0.6 }, // point of origin of the confetti (middle of the screen)
+          });
+          */
+        });
+    </script>
+  </body>
+</html>
